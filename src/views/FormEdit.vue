@@ -11,7 +11,7 @@
                 <ui-raised-button class="btn" label="填空题" @click="addFill"/>
             </div>
             <h2 class="box-title">预览</h2>
-            <div v-if="!form.questions.length">你还没有添加题目</div>
+            <div v-if="!form.items.length">你还没有添加题目</div>
             <div class="preview" v-else>
                 <div class="form-title">{{ form.name }}</div>
                 <div class="form">
@@ -19,7 +19,7 @@
                     <div class="form-item">姓名：<span class="input">XXX</span></div>
                 </div>
                 <ul class="question-list">
-                    <li class="question-item" v-for="(q, index) in form.questions" @click="edit(q, index)">
+                    <li class="question-item" v-for="(q, index) in form.items" @click="edit(q, index)">
                         <div class="content">
                             {{ index + 1 }}.
                             <span v-if="q.type === 'fill'" v-html="displayFill(q)"></span>
@@ -89,10 +89,32 @@
                 </div>
             </div>
         </ui-drawer>
+        <ui-drawer class="setting-box" right :open="settingVisible" @close="toggle()">
+            <ui-appbar title="设置">
+                <ui-icon-button icon="close" @click="cancel" title="取消" slot="left" />
+            </ui-appbar>
+            <div class="body">
+                <div class="btns">
+                    <ui-raised-button label="导入导出" @click="importExportData" />
+                </div>
+            </div>
+        </ui-drawer>
+        <ui-drawer class="io-box" right :open="ioVisible" :docked="false" @close="toggleIo()">
+            <ui-appbar title="导入导出">
+                <ui-icon-button icon="close" @click="toggleIo" title="取消" slot="left" />
+                <ui-icon-button icon="all_inclusive" @click="open" title="关联其他应用" slot="right" />
+                <ui-icon-button icon="check" @click="ioFinish" title="导入" slot="right" />
+            </ui-appbar>
+            <div class="body">
+                <textarea v-model="ioData"></textarea>
+            </div>
+        </ui-drawer>
     </my-page>
 </template>
 
 <script>
+    const Intent = window.Intent
+
     // eslint-disable-next-line
     Array.prototype.contains = function (obj) {
         var i = this.length
@@ -113,19 +135,35 @@
             return {
                 page: {
                     menu: [
+                        // {
+                        //     type: 'icon',
+                        //     icon: 'settings',
+                        //     click: this.toggleSetting,
+                        //     title: '设置'
+                        // },
+                        {
+                            type: 'icon',
+                            icon: 'import_export',
+                            click: this.toggleIo,
+                            title: '导入导出'
+                        },
                         {
                             type: 'icon',
                             icon: 'check',
-                            click: this.test
+                            click: this.test,
+                            title: '保存'
                         }
                     ]
                 },
                 isAdd: true,
                 isEdit: false,
+                settingVisible: false,
+                ioData: '',
+                ioVisible: false,
                 form: {
                     id: new Date().getTime(),
                     name: '未命名',
-                    questions: []
+                    items: []
                 },
                 question: null, // 当前题目
                 options: []
@@ -138,8 +176,54 @@
         },
         mounted() {
             this.init()
+            this.toggleIo()
         },
         methods: {
+            open() {
+                let intent = new Intent({
+                    action: 'http://webintent.yunser.com/?',
+                    type: 'text/*',
+                    data: this.ioData,
+                    extras: {
+                        fileName: new Date().getTime() + '.json'
+                    }
+                })
+                navigator.startActivity(intent, data => {
+                    this.ioData = data
+                    console.log('成功')
+                }, data => {
+                    console.log('失败')
+                })
+            },
+            toggleIo() {
+                this.ioVisible = !this.ioVisible
+                if (this.ioVisible) {
+                    let data = {
+                        version: '1.0.0',
+                        info: this.form
+                    }
+                    this.ioData = JSON.stringify(data, null, 4)
+                }
+                // let blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+// FileSaver.saveAs(blob, "hello world.txt");
+            },
+            ioFinish() {
+                this.ioVisible = false
+                this.inportData(this.ioData)
+            },
+            inportData(data) {
+                try {
+                    let json = JSON.parse(data)
+                    this.form = json.info
+                } catch (e) {
+                    alert('导入失败')
+                }
+            },
+            importExportData() {
+            },
+            toggleSetting() {
+                this.settingVisible = !this.settingVisible
+            },
             toggle() {
                 this.question = null
             },
@@ -175,9 +259,9 @@
                 }
 
                 if (this.isEdit) {
-                    this.form.questions.splice(this.editIndex, 1, question)
+                    this.form.items.splice(this.editIndex, 1, question)
                 } else {
-                    this.form.questions.push(question)
+                    this.form.items.push(question)
                 }
                 this.question = null
                 this.save()
@@ -186,7 +270,7 @@
                 this.question = null
             },
             removeQuestion() {
-                this.form.questions.splice(this.editIndex, 1)
+                this.form.items.splice(this.editIndex, 1)
                 this.save()
                 this.question = null
             },
@@ -303,7 +387,7 @@
                 } else {
                     // TODO 修改试卷名
                 }
-                this.$router.push('/forms')
+                this.$router.push('/')
             },
             numberToLetter(number) {
                 let arr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -345,7 +429,35 @@
 <style lang="scss">
 @import "../scss/var";
 
+.io-box {
+    width: 100%;
+    max-width: 560px;
+    .body {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 16px;
+    }
+    textarea {
+        outline: none;
+        border: 1px solid #eee;
+        width: 100%;
+        height: 100%;
+        padding: 16px;
+        // max-height: 400px;
+    }
+}
 .item-box {
+    width: 100%;
+    max-width: 560px;
+    .body {
+        padding: 16px;
+    }
+}
+
+.setting-box {
     width: 100%;
     max-width: 560px;
     .body {
