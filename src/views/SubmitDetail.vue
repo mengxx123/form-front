@@ -1,23 +1,22 @@
 <template>
     <my-page title="测试">
         <div class="container">
-            <div class="form-box" v-if="form">
-                <div class="name">{{ form.name }}</div>
+            <div class="form-box" v-if="submit">
+                <div class="name">{{ submit.name }}</div>
                 <div class="meta">
-                    <div class="item">发布时间：{{ form.publishTime | timeFilter }}</div>
-                    <div class="item">提交数量：{{ form.submitCount }}</div>
+                    <div class="item">提交时间：{{ submit.createTime | timeFilter }}</div>
                 </div>
-                <div class="desc">{{ form.description }}</div>
+                <!-- <div class="desc">{{ submit.description }}</div> -->
             </div>
             <ul class="item-list">
-                <li class="item" v-for="item in items">
-                    <div v-if="item.type === 'text'">
-                        <ui-text-field v-model="item.userInput" :label="item.label" />
+                <li class="item" v-for="{content, formItem} in items">
+                    <div v-if="formItem.type === 'text'">
+                        <ui-text-field v-model="content" :label="formItem.label" />
                     </div>
-                    <div v-else-if="item.type === 'select'">
+                    <div v-else-if="formItem.type === 'select'">
                         <!-- multiple -->
-                        <ui-select-field v-model="item.userInput"  :label="item.label">
-                            <ui-menu-item v-for="option, index in item.options" 
+                        <ui-select-field v-model="content"  :label="formItem.label">
+                            <ui-menu-item v-for="option, index in formItem.options" 
                                 :key="index" :value="option" :title="option"/>
                         </ui-select-field>
                     </div>
@@ -26,7 +25,6 @@
                     </div>
                 </li>
             </ul>
-            <ui-raised-button primary label="提交" @click="submit" />
         </div>
     </my-page>
 </template>
@@ -39,7 +37,7 @@
     export default {
         data () {
             return {
-                form: null,
+                submit: null,
                 items: [],
             }
         },
@@ -47,22 +45,15 @@
         },
         mounted() {
             let id = this.$route.params.id
-            this.$http.get(`/forms/${id}`).then(
+            this.$http.get(`/submits/${id}`).then(
                 response => {
                     let data = response.data
-                    this.form = data
-                },
-                response => {
-                    console.log(response)
-                })
-            this.$http.get(`/forms/${id}/items`).then(
-                response => {
-                    let data = response.data
-                    this.items = data
+                    this.submit = data
+                    this.items = this.submit.items
                     for (let i = 0; i < this.items.length; i++) {
                         let item = this.items[i]
-                        if (item.type === 'select') {
-                            this.items[i].options = item.value.split(',')
+                        if (item.formItem.type === 'select') {
+                            this.items[i].formItem.options = item.formItem.value.split(',')
                         }
                     }
                 },

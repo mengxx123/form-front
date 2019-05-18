@@ -2,15 +2,22 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import NProgress from 'nprogress'
 
+const Home = resolve => require(['@/views/Home'], resolve)
 const About = resolve => require(['@/views/About'], resolve)
 const Form = resolve => require(['@/views/Form'], resolve)
 const FormDetail = resolve => require(['@/views/FormDetail'], resolve)
 const FormEdit = resolve => require(['@/views/FormEdit'], resolve)
+const Submit = resolve => require(['@/views/Submit'], resolve)
+const SubmitDetail = resolve => require(['@/views/SubmitDetail'], resolve)
 const Error404 = resolve => require(['@/views/error/Error404'], resolve)
 
 Vue.use(Router)
 
 let routes = [
+    {
+        path: '/',
+        component: Home
+    },
     {
         path: '/form/add',
         component: FormEdit
@@ -24,8 +31,16 @@ let routes = [
         component: FormEdit
     },
     {
-        path: '/',
+        path: '/form',
         component: Form
+    },
+    {
+        path: '/forms/:id/submits',
+        component: Submit
+    },
+    {
+        path: '/submits/:id',
+        component: SubmitDetail
     },
     {
         path: '/about',
