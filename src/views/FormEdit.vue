@@ -1,40 +1,42 @@
 <template>
-    <my-page title="添加试卷" :page="page" backable>
-        <div class="form-add-box">
-            <ui-text-field class="input" v-model="form.name" hintText="试卷名称" />
-            <div v-if="!question">
-                <div class="tip">选择要添加的题目类型</div>
-                <ui-raised-button class="btn" label="判断题" @click="addJudgment"/>
-                <ui-raised-button class="btn" label="单选题" @click="addSingle"/>
-                <ui-raised-button class="btn" label="多选题" @click="addMutiple"/>
-                <ui-raised-button class="btn" label="问答题" @click="addAq"/>
-                <ui-raised-button class="btn" label="填空题" @click="addFill"/>
-            </div>
-            <h2 class="box-title">预览</h2>
-            <div v-if="!form.items.length">你还没有添加题目</div>
-            <div class="preview" v-else>
-                <div class="form-title">{{ form.name }}</div>
-                <div class="form">
-                    <div class="form-item">成绩：<span class="input score-100">100</span></div>
-                    <div class="form-item">姓名：<span class="input">XXX</span></div>
+    <my-page title="编辑表单" :page="page" backable>
+        <div class="common-container container">
+            <div class="form-add-box">
+                <ui-text-field class="input" v-model="form.name" hintText="试卷名称" />
+                <div v-if="!question">
+                    <div class="tip">选择要添加的题目类型</div>
+                    <ui-raised-button class="btn" label="判断题" @click="addJudgment"/>
+                    <ui-raised-button class="btn" label="单选题" @click="addSingle"/>
+                    <ui-raised-button class="btn" label="多选题" @click="addMutiple"/>
+                    <ui-raised-button class="btn" label="问答题" @click="addAq"/>
+                    <ui-raised-button class="btn" label="填空题" @click="addFill"/>
                 </div>
-                <ul class="question-list">
-                    <li class="question-item" v-for="(q, index) in form.items" @click="edit(q, index)">
-                        <div class="content">
-                            {{ index + 1 }}.
-                            <span v-if="q.type === 'fill'" v-html="displayFill(q)"></span>
-                            <span v-else>（{{ getQuestionType(q) }}） {{ q.content }}</span>
-                            <span v-if="q.type === 'judgment'">（ <span class="user-input">{{ getCheckOrCross(q.answer) }}</span> ）</span>
-                            <span v-if="q.type === 'single'">（ <span class="user-input">{{ numberToLetter(q.answer) }}</span> ）</span>
-                            <span v-if="q.type === 'multiple'">（ <span class="user-input">{{ numbersToLetters(q.answer) }}</span> ）</span>
-                        </div>
-                        <ul class="question-option-list" v-if="q.type === 'single' || q.type === 'multiple'">
-                            <li class="item" v-for="(item, i) in q.options">{{ numberToLetter(i) }}. {{ item }}</li>
-                        </ul>
-                        <div class="aq-answer" v-if="q.type === 'aq'">答：<span class="user-input">{{ q.answer }}</span></div>
+                <h2 class="box-title">预览</h2>
+                <div v-if="!items.length">你还没有添加题目</div>
+                <div class="preview" v-else>
+                    <!-- <div class="form-title">{{ form.name }}</div>
+                    <div class="form">
+                        <div class="form-item">成绩：<span class="input score-100">100</span></div>
+                        <div class="form-item">姓名：<span class="input">XXX</span></div>
+                    </div> -->
+                    <ul class="question-list">
+                        <li class="question-item" v-for="(q, index) in items" @click="edit(q, index)">
+                            <div class="content">
+                                {{ index + 1 }}.
+                                <span v-if="q.type === 'fill'" v-html="displayFill(q)"></span>
+                                <span v-else>（{{ getQuestionType(q) }}） {{ q.title }}</span>
+                                <span v-if="q.type === 'judgment'">（ <span class="user-input">{{ getCheckOrCross(q.answer) }}</span> ）</span>
+                                <span v-if="q.type === 'single'">（ <span class="user-input">{{ numberToLetter(q.answer) }}</span> ）</span>
+                                <span v-if="q.type === 'multiple'">（ <span class="user-input">{{ numbersToLetters(q.answer) }}</span> ）</span>
+                            </div>
+                            <ul class="question-option-list" v-if="q.type === 'single' || q.type === 'multiple'">
+                                <li class="item" v-for="(item, i) in q.options">{{ numberToLetter(i) }}. {{ item }}</li>
+                            </ul>
+                            <div class="aq-answer" v-if="q.type === 'aq'">答：<span class="user-input">{{ q.answer }}</span></div>
 
-                    </li>
-                </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <ui-drawer class="item-box" right :open="question" @close="toggle()">
@@ -163,8 +165,8 @@
                 form: {
                     id: new Date().getTime(),
                     name: '未命名',
-                    items: []
                 },
+                items: [],
                 question: null, // 当前题目
                 options: []
             }
@@ -176,7 +178,7 @@
         },
         mounted() {
             this.init()
-            this.toggleIo()
+            // this.toggleIo()
         },
         methods: {
             open() {
@@ -228,13 +230,34 @@
                 this.question = null
             },
             init() {
-                if (this.$route.params.id) {
-                    this.isAdd = false
-                    let form = this.$storage.get('form-' + this.$route.params.id)
-                    if (form) {
-                        this.form = form
-                    }
+                this.formId = this.$route.params.id
+                if (this.formId) {
+                    this.$http.get(`/forms/${this.formId}`).then(
+                        response => {
+                            let data = response.data
+                            console.log('data', data)
+                            this.form = data
+                            this.$http.get(`/forms/${this.formId}/items`).then(
+                                response => {
+                                    let data = response.data
+                                    console.log('items', data)
+                                    this.items = data
+                                },
+                                response => {
+                                    console.log(response)
+                                })
+                        },
+                        response => {
+                            console.log(response)
+                        })
                 }
+                // if (this.$route.params.id) {
+                //     this.isAdd = false
+                //     let form = this.$storage.get('form-' + this.$route.params.id)
+                //     if (form) {
+                //         this.form = form
+                //     }
+                // }
 
 //            this.addJudgment()
 //            this.addSingle()
@@ -243,28 +266,28 @@
 //            this.addFill()
             },
             finish() {
-                let question = {
-                    id: new Date().getTime(), // TODO
-                    type: this.question.type,
-                    content: this.question.content,
-                    answer: this.question.answer,
-                    userAnswer: null
-                }
-                if (this.question.type === 'single' || this.question.type === 'multiple') {
-                    question.options = this.options
-                } else if (this.question.type === 'fill') {
-                    question.answer = question.answer.split(',')
-                } else if (question.type === 'judgment') {
-                    question.answer = question.answer === 'true'
-                }
+                // let question = {
+                //     id: new Date().getTime(), // TODO
+                //     type: this.question.type,
+                //     content: this.question.content,
+                //     answer: this.question.answer,
+                //     userAnswer: null
+                // }
+                // if (this.question.type === 'single' || this.question.type === 'multiple') {
+                //     question.options = this.options
+                // } else if (this.question.type === 'fill') {
+                //     question.answer = question.answer.split(',')
+                // } else if (question.type === 'judgment') {
+                //     question.answer = question.answer === 'true'
+                // }
 
-                if (this.isEdit) {
-                    this.form.items.splice(this.editIndex, 1, question)
-                } else {
-                    this.form.items.push(question)
-                }
-                this.question = null
-                this.save()
+                // if (this.isEdit) {
+                //     this.form.items.splice(this.editIndex, 1, question)
+                // } else {
+                //     this.form.items.push(question)
+                // }
+                // this.question = null
+                // this.save()
             },
             cancel() {
                 this.question = null
@@ -375,19 +398,31 @@
                 this.$storage.set('form-' + this.form.id, this.form)
             },
             test() {
-                this.$storage.set('form-' + this.form.id, this.form)
-                let forms = this.$storage.get('forms', [])
+                // this.$storage.set('form-' + this.form.id, this.form)
+                // let forms = this.$storage.get('forms', [])
 
                 if (this.isAdd) {
-                    forms.push({
-                        id: this.form.id,
+                    this.$http.post(`/forms`, {
                         name: this.form.name
-                    })
-                    this.$storage.set('forms', forms)
+                    }).then(
+                        response => {
+                            let data = response.data
+                            console.log('items', data)
+                            this.$router.replace(`/forms/${data.id}/edit`)
+                            // this.items = data
+                        },
+                        response => {
+                            console.log(response)
+                        })
+                    // forms.push({
+                    //     id: this.form.id,
+                    //     name: this.form.name
+                    // })
+                    // this.$storage.set('forms', forms)
                 } else {
                     // TODO 修改试卷名
                 }
-                this.$router.push('/')
+                
             },
             numberToLetter(number) {
                 let arr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

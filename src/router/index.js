@@ -3,13 +3,13 @@ import Router from 'vue-router'
 import NProgress from 'nprogress'
 
 const Home = resolve => require(['@/views/Home'], resolve)
-const About = resolve => require(['@/views/About'], resolve)
 const Form = resolve => require(['@/views/Form'], resolve)
 const FormDetail = resolve => require(['@/views/FormDetail'], resolve)
 const FormEdit = resolve => require(['@/views/FormEdit'], resolve)
 const Submit = resolve => require(['@/views/Submit'], resolve)
 const SubmitDetail = resolve => require(['@/views/SubmitDetail'], resolve)
 const Error404 = resolve => require(['@/views/error/Error404'], resolve)
+const OauthCallback = resolve => require(['@/views/oauth/Callback'], resolve)
 
 Vue.use(Router)
 
@@ -17,6 +17,10 @@ let routes = [
     {
         path: '/',
         component: Home
+    },
+    {
+        path: '/oauth/callback',
+        component: OauthCallback
     },
     {
         path: '/form/add',
@@ -31,7 +35,7 @@ let routes = [
         component: FormEdit
     },
     {
-        path: '/form',
+        path: '/forms',
         component: Form
     },
     {
@@ -41,10 +45,6 @@ let routes = [
     {
         path: '/submits/:id',
         component: SubmitDetail
-    },
-    {
-        path: '/about',
-        component: About
     },
     {
         path: '*',

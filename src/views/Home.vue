@@ -1,13 +1,15 @@
 <template>
-    <my-page title="云设表单" :page="page">
+    <my-page title="表单" :page="page">
         <!-- <ui-raised-button label="制作表单" primary to="/form/add"/> -->
-        <ul class="form-list">
-            <li class="item" v-for="item in forms">
-                <router-link class="link" :to="'/forms/' + item.id">
-                    <div class="name">{{ item.name }}</div>
-                </router-link>
-            </li>
-        </ul>
+        <div class="common-container container">
+            <ul class="form-list">
+                <li class="item" v-for="item in forms">
+                    <router-link class="link" :to="'/forms/' + item.id">
+                        <div class="name">{{ item.name }}</div>
+                    </router-link>
+                </li>
+            </ul>
+        </div>
     </my-page>
 </template>
 
@@ -38,7 +40,7 @@
         },
         methods: {
             init() {
-                this.$http.get(`/forms?page_size=20&page=${this.pagination.page}`).then(
+                this.$http.get(`/publicForms?page_size=20&page=${this.pagination.page}`).then(
                     response => {
                         let data = response.data
                         // this.forms = this.forms.concat(data)

@@ -1,16 +1,18 @@
 <template>
-    <my-page title="云设表单">
-        <!-- <ui-raised-button label="制作表单" primary to="/form/add"/> -->
-        <ul class="submit-list">
-            <li class="item" v-for="item in submits">
-                <router-link class="link" :to="'/submits/' + item.id">
-                    <div>游客</div>
-                    <div class="name">{{ item.createTime | timeFilter }}</div>
-                </router-link>
-                <button type="button" @click.stop="remove(item)">删除</button>
-            </li>
-            <div v-if="!submits.length">暂无数据</div>
-        </ul>
+    <my-page title="提交记录">
+        <div class="common-container container">
+            <!-- <ui-raised-button label="制作表单" primary to="/form/add"/> -->
+            <ul class="submit-list">
+                <li class="item" v-for="item in submits">
+                    <router-link class="link" :to="'/submits/' + item.id">
+                        <div>游客</div>
+                        <div class="name">{{ item.createTime | timeFilter }}</div>
+                    </router-link>
+                    <button type="button" @click.stop="remove(item)">删除</button>
+                </li>
+                <div v-if="!submits.length">暂无数据</div>
+            </ul>
+        </div>
     </my-page>
 </template>
 
@@ -83,7 +85,9 @@
 <style lang="scss" scoped>
 .submit-list {
     .item {
+        padding: 16px 0;
         margin-bottom: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, .12);
     }
 }
 </style>

@@ -3,15 +3,26 @@
 $success: #55a532;
 $error: #f44;
 
+.common-container {
+    width: 800px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 16px 16px 80px 16px;
+}
+.float-button {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+}
 a {
     color: inherit;
 }
-html,
-body,
-#app,
-.ui-page {
-    height: 100%;
-}
+// html,
+// body,
+// #app,
+// .ui-page {
+//     height: 100%;
+// }
 // TODO
 .exam-box {
     padding: 16px;

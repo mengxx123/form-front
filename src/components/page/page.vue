@@ -8,10 +8,10 @@
                 <ui-list-item title="首页" to="/">
                     <ui-icon value="home" slot="left" />
                 </ui-list-item>
-                <!-- <ui-list-item title="我的表单" to="/forms">
-                    <ui-icon value="star" slot="left" />
-                </ui-list-item> -->
-                <ui-list-item title="关于" to="/about">
+                <ui-list-item title="我的表单" to="/forms">
+                    <ui-icon value="grade" slot="left" />
+                </ui-list-item>
+                <ui-list-item title="关于" href="https://project.yunser.com/products/12e5a020791a11e9b600632aca0974b9" target="_blank">
                     <ui-icon value="info" slot="left" />
                 </ui-list-item>
             </ui-list>

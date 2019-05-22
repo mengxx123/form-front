@@ -1,6 +1,6 @@
 <template>
     <my-page title="测试">
-        <div class="container">
+        <div class="common-container container">
             <div class="form-box" v-if="form">
                 <div class="name">{{ form.name }}</div>
                 <div class="meta">
@@ -12,11 +12,11 @@
             <ul class="item-list">
                 <li class="item" v-for="item in items">
                     <div v-if="item.type === 'text'">
-                        <ui-text-field v-model="item.userInput" :label="item.label" />
+                        <ui-text-field v-model="item.userInput" :label="item.title" />
                     </div>
                     <div v-else-if="item.type === 'select'">
                         <!-- multiple -->
-                        <ui-select-field v-model="item.userInput"  :label="item.label">
+                        <ui-select-field v-model="item.userInput"  :label="item.title">
                             <ui-menu-item v-for="option, index in item.options" 
                                 :key="index" :value="option" :title="option"/>
                         </ui-select-field>
@@ -109,7 +109,6 @@
 }
 .container {
     max-width: 600px;
-    margin: 0 auto;
 }
 .item-list {
     .item {}
